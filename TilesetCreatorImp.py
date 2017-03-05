@@ -7,7 +7,6 @@ returns: xml-file containing tileset informations
 """
 
 # Test
-# Second Test
 # this should show up on github!
 
 import tkinter as tk
