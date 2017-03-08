@@ -39,6 +39,7 @@ class Application(tk.Frame):
         self.drawToolBar()
         self.drawScrollbars()
         self.canvas.pack()
+        self.canvas.bind("<1>", self.onMouseDown)
         self.str_tilewidth.trace("w", lambda name, index, mode, var=self.str_tilewidth: self.entryCallback(var))
         self.str_tileheight.trace("w", lambda name, index, mode, var=self.str_tileheight: self.entryCallback(var))
         self.str_leftmargin.trace("w", lambda name, index, mode, var=self.str_leftmargin: self.entryCallback(var))
@@ -75,15 +76,23 @@ class Application(tk.Frame):
         apply_button.pack(side=tk.LEFT, anchor=tk.W)
         #print(self.str_tilewidth, self.str_tileheight, self.str_leftmargin, self.str_topmargin)
 
-    def drawCanvas(self):
-        width = self.root.winfo_width()
-        height = self.root.winfo_height()
-        self.canvas.config(width=width, height=height)
-        self.canvas.create_image(0,0, image=self.image, anchor=tk.NW)
+    def drawCanvas(self, draw_lines=False):
         if self.image:
+            width = self.root.winfo_width()
+            height = self.root.winfo_height()
+            self.canvas.config(width=width, height=height)
+            self.canvas.create_image(0,0, image=self.image, anchor=tk.NW)
             self.canvas.config(scrollregion=(0,0, self.image.width(), self.image.height()))
         else:
             pass
+        if draw_lines:
+            for i in range(self.leftmargin, self.image.width(), self.tilewidth):
+                self.canvas.create_line(i, 0, i, self.image.height())
+
+            for j in range(self.topmargin, self.image.height(), self.tileheight):
+                self.canvas.create_line(0, j, self.image.width(),j)
+
+
 
     def drawScrollbars(self):
         hbar = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.canvas.xview)
@@ -97,14 +106,16 @@ class Application(tk.Frame):
         filename = tkfd.askopenfilename(**options)
 
         with open(filename, mode="rb") as file:
-            print("I opened", filename)
             self.image = ImageTk.PhotoImage(file=file)
-            print("Size is", self.image.width(), "x", self.image.height())
             self.drawCanvas()
 
     def entryCallback(self, var):
-        print("Value changed")
         print(var, var.get())
+
+    def onMouseDown(self, event):
+        canvas = event.widget
+        print("Canvas Coordinates", canvas.canvasx(event.x), canvas.canvasy(event.y))
+        print("Root Coordinates", event.x_root, event.y_root)
 
     def setGrid(self):
         """ validates entries and draws tilegrid """
@@ -127,17 +138,8 @@ class Application(tk.Frame):
         self.tileheight = copy(int(self.str_tileheight.get()))
         self.leftmargin = copy(int(self.str_leftmargin.get()))
         self.topmargin = copy(int(self.str_topmargin.get()))
-        print("TW, TH, LM, TM", self.tilewidth, self.tileheight, self.leftmargin, self.topmargin)
         # Update grid
-        if self.image:
-            for i in range(self.leftmargin, self.image.width(), self.tilewidth):
-                self.canvas.create_line(i, 0, i, self.image.height())
-                print("i",i)
-            for j in range(self.topmargin, self.image.height(), self.tileheight):
-                self.canvas.create_line(0, j, self.image.width(),j)
-                print("j",j)
-        else:
-            print("no image selected")
+        self.drawCanvas(draw_lines=True)
 
 
 if __name__ == "__main__":
