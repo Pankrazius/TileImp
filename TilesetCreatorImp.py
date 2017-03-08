@@ -114,8 +114,20 @@ class Application(tk.Frame):
 
     def onMouseDown(self, event):
         canvas = event.widget
+        print(event.widget)
         print("Canvas Coordinates", canvas.canvasx(event.x), canvas.canvasy(event.y))
         print("Root Coordinates", event.x_root, event.y_root)
+        cellindex = self.getCell(canvas.canvasx(event.x), canvas.canvasy(event.y))
+        print("We are in cell:", cellindex)
+
+
+    def getCell(self, x, y):
+        cellx = (x - self.leftmargin)//self.tilewidth
+        celly = (y - self.topmargin)// self.tileheight
+
+        return (int(cellx), int(celly))
+
+
 
     def setGrid(self):
         """ validates entries and draws tilegrid """
