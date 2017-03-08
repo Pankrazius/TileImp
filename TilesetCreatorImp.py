@@ -109,7 +109,7 @@ class Application(tk.Frame):
     def setGrid(self):
         """ validates entries and draws tilegrid """
 
-        # validate
+        # Validate
         print("validate entries")
         list = [(self.str_tilewidth, self.tilewidth),
                 (self.str_tileheight, self.tileheight),
@@ -128,12 +128,14 @@ class Application(tk.Frame):
         self.leftmargin = copy(int(self.str_leftmargin.get()))
         self.topmargin = copy(int(self.str_topmargin.get()))
         print("TW, TH, LM, TM", self.tilewidth, self.tileheight, self.leftmargin, self.topmargin)
-        # update grid
+        # Update grid
         if self.image:
             for i in range(self.leftmargin, self.image.width(), self.tilewidth):
-                print(i)
-            for j in range(self.topmargin, self.image.width(), self.tileheight):
-                print(j)
+                self.canvas.create_line(i, 0, i, self.image.height())
+                print("i",i)
+            for j in range(self.topmargin, self.image.height(), self.tileheight):
+                self.canvas.create_line(0, j, self.image.width(),j)
+                print("j",j)
         else:
             print("no image selected")
 
