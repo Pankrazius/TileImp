@@ -24,8 +24,8 @@ class Labels:
 
 class Paths:
 
-    DEFAULT_LOAD = "images"
-    DEFAULT_SAVE = "tilesets"
+    DEFAULT_LOAD = "Images"
+    DEFAULT_SAVE = "Tilesets"
 
 
 class Dims:
