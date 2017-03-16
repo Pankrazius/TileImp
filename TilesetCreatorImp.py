@@ -31,14 +31,16 @@ class Application(tk.Frame):
         self.str_tileheight = tk.StringVar(value="")
         self.str_leftmargin = tk.StringVar(value="")
         self.str_topmargin = tk.StringVar(value="")
-
+        self.grid_set = False
+        self.drawToolBar()
         self.canvas = tk.Canvas(self)
+        self.canvas.pack()
         self.root.title(Labels.TITLE_MAIN)
         self.root.wm_minsize(*Dims.WIN_MIN_SIZE)
         self.drawMenu()
-        self.drawToolBar()
+
         self.drawScrollbars()
-        self.canvas.pack()
+
         self.canvas.bind("<1>", self.onMouseDown)
         self.str_tilewidth.trace("w", lambda name, index, mode, var=self.str_tilewidth: self.entryCallback(var))
         self.str_tileheight.trace("w", lambda name, index, mode, var=self.str_tileheight: self.entryCallback(var))
@@ -113,13 +115,19 @@ class Application(tk.Frame):
         print(var, var.get())
 
     def onMouseDown(self, event):
-        canvas = event.widget
-        print(event.widget)
-        print("Canvas Coordinates", canvas.canvasx(event.x), canvas.canvasy(event.y))
-        print("Root Coordinates", event.x_root, event.y_root)
-        cellindex = self.getCell(canvas.canvasx(event.x), canvas.canvasy(event.y))
-        print("We are in cell:", cellindex)
-
+        if self.grid_set is False:
+            return
+        else:
+            cell_list=[]
+            canvas = event.widget
+            print(event.widget)
+            print("Canvas Coordinates", canvas.canvasx(event.x), canvas.canvasy(event.y))
+            print("Root Coordinates", event.x_root, event.y_root)
+            cellindex = self.getCell(canvas.canvasx(event.x), canvas.canvasy(event.y))
+            print("We are in cell:", cellindex)
+            cell_list.append(Cell(cellindex[0], cellindex[1], self.tilewidth, self.tileheight))
+            for cell in cell_list:
+                print(cell.x, cell.y, cell.height, cell.width)
 
     def getCell(self, x, y):
         cellx = (x - self.leftmargin)//self.tilewidth
@@ -127,7 +135,10 @@ class Application(tk.Frame):
 
         return (int(cellx), int(celly))
 
+    def cellTopLeft(self, cellx, celly):
 
+        cell_left = cellx * self.tilewidth + self.leftmargin
+        cell_top = celly * self.tileheight + self.topmargin
 
     def setGrid(self):
         """ validates entries and draws tilegrid """
@@ -151,7 +162,64 @@ class Application(tk.Frame):
         self.leftmargin = copy(int(self.str_leftmargin.get()))
         self.topmargin = copy(int(self.str_topmargin.get()))
         # Update grid
+        self.grid_set = True
         self.drawCanvas(draw_lines=True)
+
+class TilesetWindow(tk.Frame):
+    """Subclassing tk.Canvas; drawing Grid, setting and removing grid cells, applying Tiles"""
+    def __init__(self, master):
+        tk.Frame.__init__(self)
+
+
+class Cell(object):
+    """ Basic class, topleft position and dimensions of a cell."""
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+class Tile(object):
+    """Collection of cells, forming a tile"""
+    def __init__(self, cells, index):
+        self.index  = index
+        self.cells = cells
+        self.x = 0
+        self.y = 0
+        self.width = 0
+        self.height = 0
+
+    def _get_dimensions(self):
+        """private methode of Tile: getting topleft / width/height from cell-list"""
+        pass
+
+
+    def index(self):
+        return self.index
+
+
+
+        pass
+
+class Anim_Tile(Tile):
+    """ Like Tile, but with lists for animation"""
+    def __init__(self):
+        pass
+
+def validateTile(list):
+    """returns True if given list of cell-coordinates represents a rectangle, otherwise returns False"""
+    if len(list) == 1:
+        return True
+    minx = min(list, key=lambda x: x[0])[0]
+    maxx = max(list, key=lambda x: x[0])[0]
+    miny = min(list, key=lambda y: y[1])[1]
+    maxy = max(list, key=lambda y: y[1])[1]
+    size = (maxx - minx + 1) * (maxy - miny + 1)
+    if len(list) == size:
+        return True
+    else:
+        return False
+
 
 
 if __name__ == "__main__":
